@@ -133,11 +133,10 @@ export async function getUserProjects(userId: string): Promise<Project[]> {
     console.log('getUserProjects called for userId:', userId);
     const projectsRef = collection(db, 'projects');
 
-    // Simplified query - just get user's projects and filter archived in code
+    // Simple query - no orderBy to avoid composite index requirement
     const q = query(
       projectsRef,
-      where('createdBy', '==', userId),
-      orderBy('updatedAt', 'desc')
+      where('createdBy', '==', userId)
     );
 
     console.log('Executing Firestore query...');
@@ -157,7 +156,8 @@ export async function getUserProjects(userId: string): Promise<Project[]> {
           updatedAt: data.updatedAt?.toDate() || new Date(),
         };
       })
-      .filter((project) => project.status !== 'archived'); // Filter archived in code
+      .filter((project) => project.status !== 'archived') // Filter archived in code
+      .sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime()); // Sort in memory
 
     console.log('Filtered to', projects.length, 'active projects');
     return projects;
