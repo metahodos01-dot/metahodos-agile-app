@@ -1,5 +1,5 @@
 import React from 'react';
-import { XMarkIcon, CheckCircleIcon, SparklesIcon } from '@heroicons/react/24/outline';
+import { XMarkIcon, SparklesIcon } from '@heroicons/react/24/outline';
 import { HeroSection } from '../components/landing/HeroSection';
 import { ValuePropositionSection } from '../components/landing/ValuePropositionSection';
 import { AIFeaturesSection } from '../components/landing/AIFeaturesSection';

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../../contexts/AuthContext';
+
 import {
   MetahodosButton,
   MetahodosCard,
@@ -18,7 +18,6 @@ import {
   getStoriesByProject,
   getEpicsByProject,
   deleteStory,
-  subscribeToStories,
   type StoryFilters,
 } from '../../lib/firestore-backlog';
 import type { Story, Epic, StoryStatus, MoscowPriority } from '../../lib/types';
@@ -30,7 +29,6 @@ import toast from 'react-hot-toast';
 const DEFAULT_PROJECT_ID = 'default-project';
 
 export const BacklogPage: React.FC = () => {
-  const { currentUser } = useAuth();
   const [stories, setStories] = useState<Story[]>([]);
   const [epics, setEpics] = useState<Epic[]>([]);
   const [loading, setLoading] = useState(true);

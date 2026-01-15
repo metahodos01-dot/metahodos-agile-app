@@ -1,15 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../../contexts/AuthContext';
+
 import {
   MetahodosButton,
-  MetahodosCard,
+  
   MetahodosBadge,
 } from '../../components/ui';
 import { PlusIcon, InformationCircleIcon } from '@heroicons/react/24/outline';
 import {
   getEpicsByProject,
   getStoriesByProject,
-  subscribeToStories,
   updateStory,
 } from '../../lib/firestore-backlog';
 import type { Story, Epic, MoscowPriority } from '../../lib/types';
@@ -60,7 +59,7 @@ const MOSCOW_COLUMNS: MoscowColumn[] = [
 ];
 
 export const MoscowBoardPage: React.FC = () => {
-  const { currentUser } = useAuth();
+  
   const [stories, setStories] = useState<Story[]>([]);
   const [epics, setEpics] = useState<Epic[]>([]);
   const [loading, setLoading] = useState(true);
@@ -154,12 +153,6 @@ export const MoscowBoardPage: React.FC = () => {
   const couldHaveCount = getStoriesByPriority('could_have').length;
   const wontHaveCount = getStoriesByPriority('wont_have').length;
   const unassignedCount = getStoriesByPriority(null).length;
-
-  const totalStoryPoints = stories.reduce((sum, s) => sum + (s.storyPoints || 0), 0);
-  const mustHavePoints = getStoriesByPriority('must_have').reduce(
-    (sum, s) => sum + (s.storyPoints || 0),
-    0
-  );
 
   if (loading) {
     return (

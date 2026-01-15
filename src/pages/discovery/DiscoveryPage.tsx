@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext';
+
 import {
   MetahodosButton,
   MetahodosCard,
@@ -72,7 +72,7 @@ const DISCOVERY_TOOLS: DiscoveryTool[] = [
 ];
 
 export const DiscoveryPage: React.FC = () => {
-  const { currentUser } = useAuth();
+  
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [canvasStatus, setCanvasStatus] = useState({
@@ -210,7 +210,6 @@ export const DiscoveryPage: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {DISCOVERY_TOOLS.map((tool) => {
             const exists = getToolStatus(tool.id);
-            const Icon = tool.icon;
 
             return (
               <ToolCard
@@ -269,10 +268,10 @@ const ToolCard: React.FC<ToolCardProps> = ({ tool, exists, onNavigate }) => {
         <div className="flex items-start justify-between mb-4">
           <div className="flex items-center space-x-3">
             <div
-              className={`${tool.bgColor} rounded-lg p-3`}
-              style={{ borderColor: tool.color, borderWidth: '2px' }}
+              className={`${tool.bgColor} rounded-lg p-3 border-2`}
+              style={{ borderColor: tool.color }}
             >
-              <Icon className="h-6 w-6" style={{ color: tool.color }} />
+              <Icon className="h-6 w-6" />
             </div>
             <div className="flex-1">
               <h3 className="text-lg font-semibold text-metahodos-navy">{tool.title}</h3>

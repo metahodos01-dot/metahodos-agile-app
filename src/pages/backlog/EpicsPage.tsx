@@ -21,7 +21,6 @@ import {
   createEpic,
   updateEpic,
   deleteEpic,
-  subscribeToEpics,
   type CreateEpicData,
   type UpdateEpicData,
 } from '../../lib/firestore-backlog';
@@ -180,18 +179,6 @@ export const EpicsPage: React.FC = () => {
         return 'success';
       default:
         return 'default';
-    }
-  };
-
-  // Get status icon
-  const getStatusIcon = (status: EpicStatus) => {
-    switch (status) {
-      case 'backlog':
-        return <ClockIcon className="h-4 w-4" />;
-      case 'in_progress':
-        return <RocketLaunchIcon className="h-4 w-4" />;
-      case 'done':
-        return <CheckCircleIcon className="h-4 w-4" />;
     }
   };
 

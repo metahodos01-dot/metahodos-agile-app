@@ -3,9 +3,9 @@
  * Provides project selection and switching functionality across the app
  */
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useAuth } from './AuthContext';
-import { getUserProjects, getProject } from '../lib/firestore-projects';
+import { getUserProjects } from '../lib/firestore-projects';
 import type { Project } from '../lib/types';
 import toast from 'react-hot-toast';
 

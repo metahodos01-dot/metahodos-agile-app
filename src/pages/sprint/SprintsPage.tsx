@@ -17,14 +17,12 @@ import {
   BoltIcon,
   CheckCircleIcon,
   ClockIcon,
-  ChartBarIcon,
 } from '@heroicons/react/24/outline';
 import {
   getSprintsByProject,
   createSprint,
   updateSprint,
   deleteSprint,
-  getSprintStats,
   type CreateSprintData,
   type UpdateSprintData,
 } from '../../lib/firestore-sprint';
@@ -225,19 +223,6 @@ export const SprintsPage: React.FC = () => {
     }
   };
 
-  // Get status icon
-  const getStatusIcon = (status: SprintStatus) => {
-    switch (status) {
-      case 'planning':
-        return <ClockIcon className="h-4 w-4" />;
-      case 'active':
-        return <BoltIcon className="h-4 w-4" />;
-      case 'completed':
-        return <CheckCircleIcon className="h-4 w-4" />;
-      case 'cancelled':
-        return <ClockIcon className="h-4 w-4" />;
-    }
-  };
 
   // Get status label
   const getStatusLabel = (status: SprintStatus) => {

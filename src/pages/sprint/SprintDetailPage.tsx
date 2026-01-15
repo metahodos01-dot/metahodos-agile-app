@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext';
 import {
   MetahodosButton,
   MetahodosCard,
@@ -9,7 +8,6 @@ import {
 import {
   ArrowLeftIcon,
   PlusIcon,
-  PencilIcon,
   TrashIcon,
   ChartBarIcon,
   ClipboardDocumentListIcon,
@@ -23,7 +21,7 @@ import {
   updateSprint,
   removeStoryFromSprint,
 } from '../../lib/firestore-sprint';
-import { getEpicsByProject, deleteStory } from '../../lib/firestore-backlog';
+import { getEpicsByProject } from '../../lib/firestore-backlog';
 import type { Sprint, Story, Epic, StoryStatus, SprintStatus } from '../../lib/types';
 import { StoryDetailSidebar } from '../../components/backlog/StoryDetailSidebar';
 import toast from 'react-hot-toast';
@@ -35,7 +33,6 @@ const DEFAULT_PROJECT_ID = 'default-project';
 export const SprintDetailPage: React.FC = () => {
   const { sprintId } = useParams<{ sprintId: string }>();
   const navigate = useNavigate();
-  const { currentUser } = useAuth();
 
   const [sprint, setSprint] = useState<Sprint | null>(null);
   const [stories, setStories] = useState<Story[]>([]);
@@ -114,34 +111,6 @@ export const SprintDetailPage: React.FC = () => {
     }
   };
 
-  // Handle delete story
-  const handleDeleteStory = async (story: Story) => {
-    if (!confirm(`Sei sicuro di voler eliminare "${story.title}"?`)) {
-      return;
-    }
-
-    try {
-      await deleteStory(story.id);
-      toast.success('Story eliminata con successo');
-
-      if (selectedStory?.id === story.id) {
-        setSelectedStory(null);
-      }
-
-      // Reload data
-      if (sprintId) {
-        const [storiesData, statsData] = await Promise.all([
-          getStoriesBySprint(sprintId),
-          getSprintStats(sprintId),
-        ]);
-        setStories(storiesData);
-        setStats(statsData);
-      }
-    } catch (error) {
-      console.error('Error deleting story:', error);
-      toast.error('Errore durante l\'eliminazione della story');
-    }
-  };
 
   // Handle complete sprint
   const handleCompleteSprint = async () => {
@@ -182,12 +151,12 @@ export const SprintDetailPage: React.FC = () => {
 
   // Navigate to planning (story selector will be implemented later)
   const handleSprintPlanning = () => {
-    toast.info('Sprint Planning - funzionalità in arrivo');
+    toast('Sprint Planning - funzionalità in arrivo');
   };
 
   // Navigate to daily scrum
   const handleDailyScrum = () => {
-    toast.info('Daily Scrum - funzionalità in arrivo');
+    toast('Daily Scrum - funzionalità in arrivo');
   };
 
   // Get status badge variant
@@ -499,9 +468,20 @@ export const SprintDetailPage: React.FC = () => {
       {selectedStory && (
         <StoryDetailSidebar
           story={selectedStory}
-          epics={epics}
+          epic={epics.find((e) => e.id === selectedStory.epicId)}
           onClose={() => setSelectedStory(null)}
-          onDelete={handleDeleteStory}
+          onEdit={() => {
+            // Reload stories after edit
+            if (sprintId) {
+              Promise.all([
+                getStoriesBySprint(sprintId),
+                getSprintStats(sprintId),
+              ]).then(([storiesData, statsData]) => {
+                setStories(storiesData);
+                setStats(statsData);
+              });
+            }
+          }}
         />
       )}
     </div>

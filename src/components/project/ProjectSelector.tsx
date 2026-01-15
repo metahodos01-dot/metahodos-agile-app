@@ -3,7 +3,7 @@
  * Displayed in sidebar to switch between projects
  */
 
-import { useState, Fragment } from 'react';
+import { Fragment } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useProject } from '../../contexts/ProjectContext';
 import { ChevronDownIcon, PlusIcon, FolderIcon } from '@heroicons/react/24/outline';

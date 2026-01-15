@@ -7,7 +7,6 @@ import {
   MagnifyingGlassIcon,
   PresentationChartLineIcon,
   LightBulbIcon,
-  RocketLaunchIcon,
 } from '@heroicons/react/24/outline';
 
 export const HeroSection: React.FC = () => {

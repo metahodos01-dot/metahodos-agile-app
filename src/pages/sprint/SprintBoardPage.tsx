@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext';
 import {
   MetahodosButton,
   MetahodosCard,
@@ -8,14 +7,12 @@ import {
 } from '../../components/ui';
 import {
   ArrowLeftIcon,
-  PlusIcon,
   ChatBubbleBottomCenterTextIcon,
   ClockIcon,
 } from '@heroicons/react/24/outline';
 import {
   getSprintById,
   getStoriesBySprint,
-  getSprintStats,
 } from '../../lib/firestore-sprint';
 import { getEpicsByProject, updateStory } from '../../lib/firestore-backlog';
 import type { Sprint, Story, Epic, StoryStatus } from '../../lib/types';
@@ -63,17 +60,10 @@ const KANBAN_COLUMNS: KanbanColumn[] = [
 export const SprintBoardPage: React.FC = () => {
   const { sprintId } = useParams<{ sprintId: string }>();
   const navigate = useNavigate();
-  const { currentUser } = useAuth();
 
   const [sprint, setSprint] = useState<Sprint | null>(null);
   const [stories, setStories] = useState<Story[]>([]);
   const [epics, setEpics] = useState<Epic[]>([]);
-  const [stats, setStats] = useState({
-    totalPoints: 0,
-    completedPoints: 0,
-    totalStories: 0,
-    completedStories: 0,
-  });
   const [loading, setLoading] = useState(true);
   const [selectedStory, setSelectedStory] = useState<Story | null>(null);
   const [draggedStory, setDraggedStory] = useState<Story | null>(null);
@@ -86,12 +76,11 @@ export const SprintBoardPage: React.FC = () => {
       try {
         console.log('Loading sprint board data for:', sprintId);
 
-        // Load sprint, stories, epics, and stats in parallel
-        const [sprintData, storiesData, epicsData, statsData] = await Promise.all([
+        // Load sprint, stories, and epics in parallel
+        const [sprintData, storiesData, epicsData] = await Promise.all([
           getSprintById(sprintId),
           getStoriesBySprint(sprintId),
           getEpicsByProject(DEFAULT_PROJECT_ID),
-          getSprintStats(sprintId),
         ]);
 
         if (!sprintData) {
@@ -106,7 +95,6 @@ export const SprintBoardPage: React.FC = () => {
         setSprint(sprintData);
         setStories(storiesData);
         setEpics(epicsData);
-        setStats(statsData);
         setLoading(false);
       } catch (error: any) {
         console.error('Error loading sprint board data:', error);
@@ -163,12 +151,8 @@ export const SprintBoardPage: React.FC = () => {
 
       // Reload data
       if (sprintId) {
-        const [storiesData, statsData] = await Promise.all([
-          getStoriesBySprint(sprintId),
-          getSprintStats(sprintId),
-        ]);
+        const storiesData = await getStoriesBySprint(sprintId);
         setStories(storiesData);
-        setStats(statsData);
       }
     } catch (error) {
       console.error('Error updating status:', error);
@@ -185,7 +169,7 @@ export const SprintBoardPage: React.FC = () => {
 
   // Handle daily scrum
   const handleDailyScrum = () => {
-    toast.info('Daily Scrum - funzionalità in arrivo');
+    toast('Daily Scrum - funzionalità in arrivo');
   };
 
   if (loading) {
@@ -365,14 +349,13 @@ export const SprintBoardPage: React.FC = () => {
       {selectedStory && (
         <StoryDetailSidebar
           story={selectedStory}
-          epics={epics}
+          epic={epics.find((e) => e.id === selectedStory.epicId)}
           onClose={() => setSelectedStory(null)}
-          onDelete={() => {
-            // Reload stories after delete
+          onEdit={() => {
+            // Reload stories after edit
             if (sprintId) {
               getStoriesBySprint(sprintId).then(setStories);
             }
-            setSelectedStory(null);
           }}
         />
       )}
