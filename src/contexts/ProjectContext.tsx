@@ -61,8 +61,14 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
 
     try {
       setLoading(true);
+      console.log('Loading projects for user:', currentUser.uid);
       const userProjects = await getUserProjects(currentUser.uid);
+      console.log('Projects loaded:', userProjects.length, userProjects);
       setProjects(userProjects);
+
+      if (userProjects.length === 0) {
+        console.warn('No projects found for user. User may need to create a project.');
+      }
     } catch (error) {
       console.error('Error loading projects:', error);
       toast.error('Errore nel caricamento dei progetti');

@@ -130,31 +130,40 @@ export async function getProject(projectId: string): Promise<Project | null> {
  */
 export async function getUserProjects(userId: string): Promise<Project[]> {
   try {
+    console.log('getUserProjects called for userId:', userId);
     const projectsRef = collection(db, 'projects');
+
+    // Simplified query - just get user's projects and filter archived in code
     const q = query(
       projectsRef,
       where('createdBy', '==', userId),
-      where('status', '!=', 'archived'),
-      orderBy('status'),
       orderBy('updatedAt', 'desc')
     );
 
+    console.log('Executing Firestore query...');
     const querySnapshot = await getDocs(q);
+    console.log('Query returned', querySnapshot.docs.length, 'documents');
 
-    return querySnapshot.docs.map((doc) => {
-      const data = doc.data();
-      return {
-        id: doc.id,
-        name: data.name,
-        description: data.description,
-        status: data.status,
-        createdBy: data.createdBy,
-        createdAt: data.createdAt?.toDate() || new Date(),
-        updatedAt: data.updatedAt?.toDate() || new Date(),
-      };
-    });
+    const projects = querySnapshot.docs
+      .map((doc) => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          name: data.name,
+          description: data.description,
+          status: data.status,
+          createdBy: data.createdBy,
+          createdAt: data.createdAt?.toDate() || new Date(),
+          updatedAt: data.updatedAt?.toDate() || new Date(),
+        };
+      })
+      .filter((project) => project.status !== 'archived'); // Filter archived in code
+
+    console.log('Filtered to', projects.length, 'active projects');
+    return projects;
   } catch (error) {
     console.error('Error getting user projects:', error);
+    console.error('Error details:', error);
     throw new Error('Impossibile recuperare i progetti');
   }
 }
