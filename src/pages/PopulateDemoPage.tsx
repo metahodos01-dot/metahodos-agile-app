@@ -134,6 +134,8 @@ export function PopulateDemoPage() {
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState({ current: 0, total: 0 });
 
+  console.log('PopulateDemoPage rendered - currentUser:', currentUser?.email);
+
   async function handlePopulateSACMIComplete() {
     if (!currentUser) {
       toast.error('Devi essere loggato per popolare i dati');
@@ -195,6 +197,7 @@ export function PopulateDemoPage() {
 
       // 3. Create Sprint 1 (active)
       toast('Creazione Sprint 1...');
+      console.log('Creating Sprint 1 for project:', sacmiProject.id);
       const sprint1Ref = await addDoc(collection(db, 'sprints'), {
         name: 'Sprint 1 - MVP Controllo Qualità',
         goal: 'Implementare le funzionalità core del sistema di visione artificiale e integrazione telecamere',
@@ -206,11 +209,13 @@ export function PopulateDemoPage() {
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       });
+      console.log('Sprint 1 created with ID:', sprint1Ref.id);
       currentProgress++;
       setProgress({ current: currentProgress, total: 10 });
 
       // 4. Create Sprint 2 (planning)
       toast('Creazione Sprint 2...');
+      console.log('Creating Sprint 2 for project:', sacmiProject.id);
       const sprint2Ref = await addDoc(collection(db, 'sprints'), {
         name: 'Sprint 2 - Stampa Digitale & Ottimizzazione',
         goal: 'Completare modulo stampa digitale e ottimizzare algoritmi ML per detection',
@@ -222,6 +227,7 @@ export function PopulateDemoPage() {
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       });
+      console.log('Sprint 2 created with ID:', sprint2Ref.id);
       currentProgress++;
       setProgress({ current: currentProgress, total: 10 });
 

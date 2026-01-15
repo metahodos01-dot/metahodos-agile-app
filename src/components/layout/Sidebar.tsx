@@ -18,6 +18,7 @@ import {
   ChartPieIcon,
   ArrowPathIcon,
   AdjustmentsHorizontalIcon,
+  BeakerIcon,
 } from '@heroicons/react/24/outline';
 
 interface SidebarProps {
@@ -119,10 +120,11 @@ const navSections: NavSection[] = [
     ],
   },
 
-  // Settings
+  // Settings & Tools
   {
     items: [
       { name: 'Settings', icon: Cog6ToothIcon, href: '/settings' },
+      { name: 'Demo Data', icon: BeakerIcon, href: '/populate-demo', badge: 'Dev' },
     ],
   },
 ];
