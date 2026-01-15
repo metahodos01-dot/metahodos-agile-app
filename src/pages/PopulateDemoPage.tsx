@@ -9,7 +9,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useProject } from '../contexts/ProjectContext';
 import { MetahodosButton } from '../components/ui/MetahodosButton';
 import { MetahodosCard } from '../components/ui/MetahodosCard';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, doc, updateDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { createProject } from '../lib/firestore-projects';
 import toast from 'react-hot-toast';
@@ -133,6 +133,133 @@ export function PopulateDemoPage() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState({ current: 0, total: 0 });
+
+  async function handlePopulateSACMIComplete() {
+    if (!currentUser) {
+      toast.error('Devi essere loggato per popolare i dati');
+      return;
+    }
+
+    setLoading(true);
+    setProgress({ current: 0, total: 10 }); // 1 project + 2 epics + 7 stories + 2 sprints
+
+    try {
+      let currentProgress = 0;
+
+      // 1. Create SACMI Project
+      toast('Creazione progetto SACMI...');
+      const sacmiProject = await createProject(
+        {
+          name: 'SACMI - Linea Produzione Tappi Cellulosa',
+          description: 'Sistema automatizzato per produzione e controllo qualità di tappi in cellulosa con stampa digitale personalizzata. Team di 9 persone.',
+        },
+        currentUser.uid
+      );
+      currentProgress++;
+      setProgress({ current: currentProgress, total: 10 });
+
+      // 2. Create epics and collect story IDs
+      const storyIds: string[] = [];
+
+      for (const epicData of sacmiEpics) {
+        const { stories, ...epicWithoutStories } = epicData;
+        const epicRef = await addDoc(collection(db, 'epics'), {
+          ...epicWithoutStories,
+          projectId: sacmiProject.id,
+          status: 'in_progress',
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
+        });
+        currentProgress++;
+        setProgress({ current: currentProgress, total: 10 });
+
+        for (const story of stories) {
+          const storyRef = await addDoc(collection(db, 'stories'), {
+            ...story,
+            projectId: sacmiProject.id,
+            epicId: epicRef.id,
+            tags: ['SACMI'],
+            acceptanceCriteria: [
+              'Funzionalità completamente implementata',
+              'Test automatici con coverage > 80%',
+              'Code review approvata',
+            ],
+            createdAt: serverTimestamp(),
+            updatedAt: serverTimestamp(),
+          });
+          storyIds.push(storyRef.id);
+          currentProgress++;
+          setProgress({ current: currentProgress, total: 10 });
+        }
+      }
+
+      // 3. Create Sprint 1 (active)
+      toast('Creazione Sprint 1...');
+      const sprint1Ref = await addDoc(collection(db, 'sprints'), {
+        name: 'Sprint 1 - MVP Controllo Qualità',
+        goal: 'Implementare le funzionalità core del sistema di visione artificiale e integrazione telecamere',
+        projectId: sacmiProject.id,
+        startDate: new Date('2025-01-20'),
+        endDate: new Date('2025-02-02'),
+        capacity: 34,
+        status: 'active',
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      });
+      currentProgress++;
+      setProgress({ current: currentProgress, total: 10 });
+
+      // 4. Create Sprint 2 (planning)
+      toast('Creazione Sprint 2...');
+      const sprint2Ref = await addDoc(collection(db, 'sprints'), {
+        name: 'Sprint 2 - Stampa Digitale & Ottimizzazione',
+        goal: 'Completare modulo stampa digitale e ottimizzare algoritmi ML per detection',
+        projectId: sacmiProject.id,
+        startDate: new Date('2025-02-03'),
+        endDate: new Date('2025-02-16'),
+        capacity: 26,
+        status: 'planning',
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      });
+      currentProgress++;
+      setProgress({ current: currentProgress, total: 10 });
+
+      // 5. Assign first 4 stories to Sprint 1
+      toast('Assegnazione stories a Sprint 1...');
+      for (let i = 0; i < Math.min(4, storyIds.length); i++) {
+        const storyDocRef = doc(db, 'stories', storyIds[i]);
+        await updateDoc(storyDocRef, {
+          sprintId: sprint1Ref.id,
+        });
+      }
+
+      // 6. Assign remaining stories to Sprint 2
+      toast('Assegnazione stories a Sprint 2...');
+      for (let i = 4; i < storyIds.length; i++) {
+        const storyDocRef = doc(db, 'stories', storyIds[i]);
+        await updateDoc(storyDocRef, {
+          sprintId: sprint2Ref.id,
+        });
+      }
+
+      // Refresh projects and set SACMI as current
+      await refreshProjects();
+      setCurrentProject(sacmiProject);
+
+      toast.success('🎉 Progetto SACMI completo creato con 2 epics, 7 stories e 2 sprint!');
+
+      setTimeout(() => {
+        navigate('/dashboard');
+      }, 2000);
+
+    } catch (error) {
+      console.error('Error populating SACMI data:', error);
+      toast.error('Errore durante la creazione del progetto SACMI');
+    } finally {
+      setLoading(false);
+    }
+  }
 
   async function handlePopulate() {
     if (!currentUser) {
@@ -419,16 +546,29 @@ export function PopulateDemoPage() {
           </div>
         )}
 
-        <MetahodosButton
-          variant="primary"
-          onClick={handlePopulate}
-          disabled={loading}
-          isLoading={loading}
-          className="w-full"
-          size="lg"
-        >
-          {loading ? 'Popolamento in corso...' : 'Popola Dati Demo'}
-        </MetahodosButton>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <MetahodosButton
+            variant="primary"
+            onClick={handlePopulate}
+            disabled={loading}
+            isLoading={loading}
+            className="w-full"
+            size="lg"
+          >
+            {loading ? 'Popolamento in corso...' : 'Popola Tutti i Progetti'}
+          </MetahodosButton>
+
+          <MetahodosButton
+            variant="secondary"
+            onClick={handlePopulateSACMIComplete}
+            disabled={loading}
+            isLoading={loading}
+            className="w-full"
+            size="lg"
+          >
+            {loading ? 'Popolamento in corso...' : 'Solo SACMI + 2 Sprint'}
+          </MetahodosButton>
+        </div>
       </MetahodosCard>
     </div>
   );
