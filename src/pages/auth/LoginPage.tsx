@@ -70,11 +70,19 @@ export const LoginPage: React.FC = () => {
       navigate('/dashboard');
     } catch (error: any) {
       console.error('Google login error:', error);
+      console.error('Error code:', error.code);
+      console.error('Error message:', error.message);
 
       if (error.code === 'auth/popup-closed-by-user') {
         toast.error('Accesso annullato');
+      } else if (error.code === 'auth/popup-blocked') {
+        toast.error('Popup bloccato dal browser. Abilita i popup per questo sito');
+      } else if (error.code === 'auth/unauthorized-domain') {
+        toast.error('Dominio non autorizzato. Configura Firebase Console');
+      } else if (error.code === 'auth/cancelled-popup-request') {
+        toast.error('Richiesta annullata. Riprova');
       } else {
-        toast.error('Errore durante l\'accesso con Google');
+        toast.error(`Errore durante l'accesso con Google: ${error.message || 'Errore sconosciuto'}`);
       }
     } finally {
       setLoading(false);
