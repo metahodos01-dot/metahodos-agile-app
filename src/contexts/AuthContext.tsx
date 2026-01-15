@@ -12,6 +12,7 @@ import {
 } from 'firebase/auth';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { auth, googleProvider, db } from '../lib/firebase';
+import { createProject } from '../lib/firestore-projects';
 
 /**
  * User data from Firestore
@@ -84,6 +85,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       };
 
       await setDoc(userRef, userData);
+
+      // Create default project for new user
+      try {
+        await createProject(
+          {
+            name: 'Progetto Iniziale',
+            description: 'Il tuo primo progetto su Metahodos Agile App',
+          },
+          user.uid
+        );
+      } catch (error) {
+        console.error('Error creating default project:', error);
+        // Don't throw - user creation should succeed even if project creation fails
+      }
+
       return { id: user.uid, ...userData };
     } else {
       // Update last login
